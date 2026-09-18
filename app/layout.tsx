@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Marketplace Arqui",
-  description: "Compra y venta de productos.",
+  description: "Compra y venta de productos entre personas.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
