@@ -23,8 +23,14 @@ export function AuthForm() {
     try {
       const supabase = createClient();
       if (mode === "signup") {
-        if (!fullName || !birthDate || new Date(`${birthDate}T00:00:00`) > new Date()) {
+        const enteredDate = new Date(`${birthDate}T00:00:00`);
+        const today = new Date();
+        const age = today.getFullYear() - enteredDate.getFullYear() - (today < new Date(today.getFullYear(), enteredDate.getMonth(), enteredDate.getDate()) ? 1 : 0);
+        if (!fullName || !birthDate || Number.isNaN(enteredDate.valueOf()) || enteredDate > today) {
           throw new Error("Completa tu nombre y una fecha de nacimiento válida.");
+        }
+        if (age < 18) {
+          throw new Error("Debes tener al menos 18 años para crear una cuenta.");
         }
         const { error } = await supabase.auth.signUp({
           email,
@@ -52,7 +58,7 @@ export function AuthForm() {
   const isSignup = mode === "signup";
   return (
     <form onSubmit={handleSubmit}>
-      {isSignup && <><label>Nombre completo<input required name="fullName" minLength={2} maxLength={120} type="text" placeholder="Tu nombre y apellido" autoComplete="name" /></label><label>Fecha de nacimiento<input required name="birthDate" type="date" autoComplete="bday" /></label></>}
+      {isSignup && <><label>Nombre completo<input required name="fullName" minLength={2} maxLength={120} type="text" placeholder="Tu nombre y apellido" autoComplete="name" /></label><label>Fecha de nacimiento<input required name="birthDate" type="date" autoComplete="bday" /></label><p className="form-help">Debes tener al menos 18 años para crear una cuenta.</p></>}
       <label>Correo electrónico<input required name="email" type="email" placeholder="tu@correo.com" autoComplete="email" /></label>
       <label>Contraseña<input required minLength={8} name="password" type="password" placeholder="Mínimo 8 caracteres" autoComplete={isSignup ? "new-password" : "current-password"} /></label>
       <button className="button full-button" disabled={loading} type="submit">{loading ? "Procesando..." : isSignup ? "Crear cuenta" : "Ingresar"}</button>
