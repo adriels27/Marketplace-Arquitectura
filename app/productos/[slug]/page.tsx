@@ -1,18 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReportContentForm } from "@/components/report-content-form";
 import { SiteHeader } from "@/components/site-header";
-import { getProduct, products } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog";
 import { fromDatabaseProduct, fromSampleProduct, type DatabaseProduct } from "@/lib/listings";
+import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
-
-export function generateStaticParams() {
-  return products.map(({ slug }) => ({ slug }));
-}
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    await redirectSuperadminFromMarketplace(await createClient());
+  }
   let product = getProduct(slug) ? fromSampleProduct(getProduct(slug)!) : null;
   let sellerId: string | null = null;
   let sellerProfile: { full_name: string; average_rating: number | string; review_count: number } | null = null;
@@ -53,6 +54,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             {sellerId ? <Link className="seller-box seller-link" href={`/vendedores/${sellerId}`}><span className="avatar">{sellerName[0]}</span><div><strong>{sellerName}</strong><p>{sellerRating} · Ver perfil</p></div></Link> : <div className="seller-box"><span className="avatar">{sellerName[0]}</span><div><strong>{sellerName}</strong><p>Miembro de Marketplace Arqui</p></div></div>}
             <Link className="button full-button" href={isDatabaseProduct ? `/comprar/${product.id}` : "/acceder"}>Quiero comprar</Link>
             <p className="payment-hint">Transferirás directamente al vendedor. Él revisará el comprobante que envíes.</p>
+            {isDatabaseProduct && <ReportContentForm targetId={product.id} targetType="product" />}
           </section>
         </div>
       </main>

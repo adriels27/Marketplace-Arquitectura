@@ -1,44 +1,89 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SiteHeader } from "@/components/site-header";
+import { AdminHeader } from "@/components/admin-header";
+import { AdminUserActions } from "@/components/admin-user-actions";
+import { createAdminUser } from "@/app/administracion/usuarios/actions";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-function formatDate(value: string | null) {
-  if (!value) return "No registrada";
-  const dateValue = value.includes("T") ? value : `${value}T00:00:00`;
-  return new Intl.DateTimeFormat("es-EC", { dateStyle: "medium" }).format(new Date(dateValue));
-}
-
-export default async function UsersAdminPage() {
+export default async function UsersAdminPage({ searchParams }: { searchParams: Promise<{ notice?: string; error?: string }> }) {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
   if (!userId) redirect("/acceder");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
-  if (profile?.role !== "admin") redirect("/panel");
+  const { data: profile } = await supabase.from("profiles").select("role, deleted_at, disabled_at").eq("id", userId).maybeSingle();
+  if (profile?.role !== "admin" || profile.deleted_at || profile.disabled_at) redirect("/acceder");
 
-  const { data: users } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, birth_date, created_at, role")
-    .order("created_at", { ascending: false });
+  type AdminProfile = { id: string; email: string; full_name: string | null; deleted_at: string | null; disabled_at: string | null };
+  const profiles: AdminProfile[] = [];
+  let configurationError: string | null = null;
+  for (let page = 0; ; page += 1) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, deleted_at, disabled_at")
+      .order("created_at", { ascending: false })
+      .range(page * 1000, page * 1000 + 999);
+    if (error) {
+      configurationError = error.message;
+      break;
+    }
+    profiles.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
+  const authUsers: Array<{ id: string; email?: string | null; banned_until?: string | null }> = [];
+  try {
+    const adminClient = createAdminClient();
+    for (let page = 1; ; page += 1) {
+      const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) {
+        configurationError = error.message;
+        break;
+      }
+      authUsers.push(...data.users);
+      if (data.users.length < 1000) break;
+    }
+  } catch (error) {
+    configurationError = error instanceof Error ? error.message : "No se pudieron consultar las cuentas.";
+  }
+  const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  const users = authUsers.filter((authUser) => !profileById.get(authUser.id)?.deleted_at).map((authUser) => {
+    const profile = profileById.get(authUser.id);
+    return {
+      id: authUser.id,
+      email: authUser.email ?? profile?.email ?? "Sin correo",
+      full_name: profile?.full_name ?? null,
+      enabled: !authUser.banned_until && !profile?.disabled_at,
+    };
+  });
+  const messages = await searchParams;
 
   return (
     <>
-      <SiteHeader />
+      <AdminHeader />
       <main className="admin-page">
-        <Link className="back-link" href="/panel">← Volver a mi panel</Link>
         <section className="admin-heading">
           <p className="eyebrow">Administración</p>
-          <h1>Usuarios registrados</h1>
-          <p>Consulta las cuentas nuevas y sus datos de registro.</p>
+          <h1>Usuarios</h1>
+          <p>Gestiona el acceso a las cuentas del sistema.</p>
+        </section>
+        {messages.notice && <p className="form-message" role="status">{messages.notice}</p>}
+        {(messages.error || configurationError) && <p className="form-message admin-error" role="alert">{messages.error ?? configurationError}</p>}
+        <section className="admin-create-user">
+          <h2>Crear usuario</h2>
+          <form action={createAdminUser}>
+            <label>Nombre completo<input autoComplete="name" maxLength={120} minLength={2} name="fullName" required /></label>
+            <label>Correo electrónico<input autoComplete="email" name="email" required type="email" /></label>
+            <label>Fecha de nacimiento<input autoComplete="bday" name="birthDate" required type="date" /></label>
+            <label>Contraseña temporal<input autoComplete="new-password" minLength={8} name="password" required type="password" /></label>
+            <button className="button" type="submit">Crear cuenta</button>
+          </form>
         </section>
         <section className="users-card">
-          <div className="users-card-heading"><strong>{users?.length ?? 0} usuarios</strong><span>Ordenados del más reciente al más antiguo</span></div>
+          <div className="users-card-heading"><strong>{users.length} usuarios</strong><span>Ordenados del más reciente al más antiguo</span></div>
           <div className="users-table-wrap">
             <table>
-              <thead><tr><th>Nombre</th><th>Correo</th><th>Fecha de nacimiento</th><th>Registro</th><th>Rol</th></tr></thead>
-              <tbody>{users?.map((user) => <tr key={user.id}><td>{user.full_name || "Sin nombre"}</td><td>{user.email}</td><td>{formatDate(user.birth_date)}</td><td>{formatDate(user.created_at)}</td><td><span className={`status status-${user.role}`}>{user.role === "admin" ? "Administrador" : "Usuario"}</span></td></tr>)}</tbody>
+              <thead><tr><th>Nombre</th><th>Correo</th><th>Acceso</th><th>Acciones</th></tr></thead>
+              <tbody>{users.map((user) => <tr key={user.id}><td>{user.full_name || "Sin nombre"}</td><td>{user.email}</td><td>{user.enabled ? "Habilitada" : "Deshabilitada"}</td><td><AdminUserActions userId={user.id} email={user.email} enabled={user.enabled} isCurrentUser={user.id === userId} /></td></tr>)}</tbody>
             </table>
           </div>
         </section>

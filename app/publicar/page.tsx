@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 import { PublishProductForm } from "@/components/publish-product-form";
 import { SiteHeader } from "@/components/site-header";
+import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PublishPage() {
   const supabase = await createClient();
+  await redirectSuperadminFromMarketplace(supabase);
   const { data: claimsData } = await supabase.auth.getClaims();
   const claims = claimsData?.claims;
   if (!claims?.sub) redirect("/acceder");

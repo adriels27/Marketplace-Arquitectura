@@ -45,7 +45,11 @@ export function AuthForm() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.replace("/panel");
+        const { data: userData } = await supabase.auth.getUser();
+        const { data: profile } = userData.user
+          ? await supabase.from("profiles").select("role").eq("id", userData.user.id).maybeSingle()
+          : { data: null };
+        router.replace(profile?.role === "admin" ? "/administracion/usuarios" : "/panel");
         router.refresh();
       }
     } catch (error) {

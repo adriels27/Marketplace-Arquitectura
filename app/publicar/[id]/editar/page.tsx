@@ -2,11 +2,13 @@ import { notFound, redirect } from "next/navigation";
 import { EditProductForm } from "@/components/edit-product-form";
 import { SiteHeader } from "@/components/site-header";
 import { publicImageUrl } from "@/lib/listings";
+import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  await redirectSuperadminFromMarketplace(supabase);
   const { data: claimsData } = await supabase.auth.getClaims();
   if (!claimsData?.claims?.sub) redirect("/acceder");
 

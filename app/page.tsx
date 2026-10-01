@@ -3,6 +3,7 @@ import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
 import { products as sampleProducts } from "@/lib/catalog";
 import { fromDatabaseProduct, fromSampleProduct, type DatabaseProduct } from "@/lib/listings";
+import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
 
 const categories = ["Hogar", "Tecnología", "Moda", "Deportes", "Libros", "Otros"];
@@ -25,6 +26,9 @@ async function getPublishedProducts() {
 }
 
 export default async function Home() {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    await redirectSuperadminFromMarketplace(await createClient());
+  }
   const products = await getPublishedProducts();
   return (
     <>

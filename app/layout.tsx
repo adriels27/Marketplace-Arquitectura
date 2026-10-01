@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./moderation.css";
 
 export const metadata: Metadata = {
   title: "Marketplace ",
