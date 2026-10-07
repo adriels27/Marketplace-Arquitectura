@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/logout-button";
 
 export function AdminHeader() {
   return (
@@ -9,6 +10,7 @@ export function AdminHeader() {
       </Link>
       <nav aria-label="Administración">
         <Link href="/administracion/usuarios">Usuarios</Link>
+        <LogoutButton />
       </nav>
     </header>
   );
