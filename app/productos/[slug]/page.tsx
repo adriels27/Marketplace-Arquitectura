@@ -24,6 +24,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       .from("products")
       .select("id, seller_id, title, description, price_cents, category, item_condition, location, product_images(storage_path, position)")
       .eq("id", slug)
+      .eq("status", "published")
+      .or(`moderation_status.eq.active,and(moderation_status.eq.suspended,suspended_until.lte.${new Date().toISOString()})`)
       .maybeSingle();
     if (data) {
       product = fromDatabaseProduct(data as DatabaseProduct);

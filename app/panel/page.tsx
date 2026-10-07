@@ -31,7 +31,7 @@ export default async function PanelPage() {
     supabase.from("products").select("id, title, price_cents, status, created_at").eq("seller_id", claims.sub).order("created_at", { ascending: false }),
     supabase.from("orders").select("id, seller_id, reference, amount_cents, status, created_at, products(title)").eq("buyer_id", claims.sub).order("created_at", { ascending: false }),
     supabase.from("orders").select("id, reference, amount_cents, status, proof_path, created_at, products(title)").eq("seller_id", claims.sub).order("created_at", { ascending: false }),
-    supabase.from("products").select("id, title, description, price_cents, category, item_condition, location, product_images(storage_path, position)").eq("status", "published").neq("seller_id", claims.sub).order("created_at", { ascending: false }).limit(4),
+    supabase.from("products").select("id, title, description, price_cents, category, item_condition, location, product_images(storage_path, position)").eq("status", "published").neq("seller_id", claims.sub).or(`moderation_status.eq.active,and(moderation_status.eq.suspended,suspended_until.lte.${new Date().toISOString()})`).order("created_at", { ascending: false }).limit(4),
     supabase.from("seller_reviews").select("order_id").eq("buyer_id", claims.sub),
   ]);
   const warningsResult = await supabase.from("moderation_warnings").select("id, reason, created_at").eq("user_id", claims.sub).order("created_at", { ascending: false }).limit(10);

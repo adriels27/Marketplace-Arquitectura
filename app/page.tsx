@@ -15,6 +15,9 @@ async function getPublishedProducts() {
       .from("products")
       .select("id, title, description, price_cents, category, item_condition, location, product_images(storage_path, position)")
       .eq("status", "published")
+      // Un moderador puede leer todos los registros por sus permisos. Este filtro
+      // evita que una publicación retirada aparezca también en el catálogo público.
+      .or(`moderation_status.eq.active,and(moderation_status.eq.suspended,suspended_until.lte.${new Date().toISOString()})`)
       .order("created_at", { ascending: false })
       .limit(12);
 
