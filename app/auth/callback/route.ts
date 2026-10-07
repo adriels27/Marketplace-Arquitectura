@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") ?? "/panel";
+  const isPasswordRecovery = next === "/restablecer-contrasena";
 
   if (code) {
     const supabase = await createClient();
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     const userId = claimsData?.claims?.sub;
     if (userId) {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
-      if (profile?.role === "admin") {
+      if (profile?.role === "admin" && !isPasswordRecovery) {
         return NextResponse.redirect(new URL("/administracion/usuarios", requestUrl.origin));
       }
     }

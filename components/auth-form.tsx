@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -67,6 +68,7 @@ export function AuthForm() {
       <label>Contraseña<input required minLength={8} name="password" type="password" placeholder="Mínimo 8 caracteres" autoComplete={isSignup ? "new-password" : "current-password"} /></label>
       <button className="button full-button" disabled={loading} type="submit">{loading ? "Procesando..." : isSignup ? "Crear cuenta" : "Ingresar"}</button>
       {message && <p className="form-message" role="status">{message}</p>}
+      {!isSignup && <p className="access-footer"><Link href="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link></p>}
       <p className="access-footer">
         {isSignup ? "¿Ya tienes cuenta?" : "¿Aún no tienes cuenta?"}{" "}
         <button className="text-button" onClick={() => { setMode(isSignup ? "signin" : "signup"); setMessage(null); }} type="button">
