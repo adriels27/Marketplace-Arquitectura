@@ -36,15 +36,15 @@ export default async function Home() {
   return (
     <>
       <SiteHeader />
-      <main>
+      <main id="main-content">
         <section className="hero">
           <div>
             <p className="eyebrow">Compra y vende con confianza</p>
             <h1>Encuentra algo que merece una segunda oportunidad.</h1>
             <p className="hero-copy">Descubre productos cerca de ti o publica aquello que ya no usas.</p>
-            <form className="search-box" action="#explorar">
+            <form className="search-box" action="/#explorar" method="get">
               <label className="sr-only" htmlFor="search">¿Qué estás buscando?</label>
-              <input id="search" name="search" placeholder="¿Qué estás buscando?" />
+              <input aria-label="Buscar productos" id="search" name="q" placeholder="¿Qué estás buscando?" type="search" />
               <button className="button" type="submit">Buscar</button>
             </form>
           </div>
