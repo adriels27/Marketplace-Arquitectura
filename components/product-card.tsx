@@ -1,9 +1,12 @@
 import Link from "next/link";
 import type { Listing } from "@/lib/listings";
+import { FavoriteButton } from "@/components/favorite-button";
 
 export function ProductCard({ product }: { product: Listing }) {
   return (
-    <Link className="product-card" href={product.href}>
+    <article className="product-card">
+      <FavoriteButton productId={product.id} />
+      <Link className="product-card-link" href={product.href}>
       <div className={`product-visual ${product.tone} ${product.imageUrl ? "with-image" : ""}`} aria-hidden="true" style={product.imageUrl ? { backgroundImage: `url("${product.imageUrl}")` } : undefined}>
         {!product.imageUrl && <span>{product.icon}</span>}
       </div>
@@ -13,6 +16,7 @@ export function ProductCard({ product }: { product: Listing }) {
         <p className="product-price">{product.price}</p>
         <p className="product-seller">Vendido por {product.seller}</p>
       </div>
-    </Link>
+      </Link>
+    </article>
   );
 }
