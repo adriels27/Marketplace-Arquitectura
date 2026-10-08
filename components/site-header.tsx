@@ -10,6 +10,8 @@ export function SiteHeader() {
       <nav aria-label="Navegación principal">
         <Link href="/#explorar">Explorar</Link>
         <Link href="/panel">Mis publicaciones</Link>
+        <Link href="/favoritos">Favoritos</Link>
+        <Link href="/mensajes">Mensajes</Link>
         <Link className="button button-small" href="/acceder">Ingresar</Link>
       </nav>
     </header>

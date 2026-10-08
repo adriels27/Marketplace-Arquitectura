@@ -13,10 +13,12 @@ function formatPrice(priceCents: number) {
 }
 
 function paymentStatus(status: string) {
-  if (status === "verified_by_seller" || status === "verified_demo") return { label: "Pago aprobado", tone: "status-published" };
+  if (status === "verified_by_seller") return { label: "Pago aprobado por vendedor", tone: "status-published" };
+  if (status === "verified_demo") return { label: "Pago de demostración", tone: "status-draft" };
   if (status === "proof_submitted") return { label: "Por revisar", tone: "status-draft" };
   if (status === "rejected_by_seller") return { label: "Comprobante rechazado", tone: "status-archived" };
-  return { label: "Pendiente de comprobante", tone: "status-draft" };
+  if (status === "cancelled") return { label: "Pedido cancelado", tone: "status-archived" };
+  return { label: "Pedido creado · falta comprobante", tone: "status-draft" };
 }
 
 export default async function PanelPage() {
@@ -49,7 +51,7 @@ export default async function PanelPage() {
     <>
       <SiteHeader />
       <main className="dashboard">
-        <div className="dashboard-heading"><div><p className="eyebrow">Tu espacio</p><h1>Hola, {name}</h1><p>Administra tus compras, ventas y publicaciones.</p>{profile?.role === "admin" && <Link className="admin-link" href="/administracion/usuarios">Ver usuarios registrados →</Link>}{(profile?.role === "admin" || profile?.role === "moderator") && <Link className="admin-link" href="/moderacion">Abrir centro de moderación →</Link>}</div><div className="dashboard-actions"><Link className="text-link" href={`/vendedores/${claims.sub}`}>Mi perfil público</Link><Link className="text-link" href="/cuenta-bancaria">Datos bancarios</Link><Link className="button" href="/publicar">+ Publicar producto</Link></div></div>
+        <div className="dashboard-heading"><div><p className="eyebrow">Tu espacio</p><h1>Hola, {name}</h1><p>Administra tus compras, ventas y publicaciones.</p>{profile?.role === "admin" && <Link className="admin-link" href="/administracion/usuarios">Ver usuarios registrados →</Link>}{(profile?.role === "admin" || profile?.role === "moderator") && <Link className="admin-link" href="/moderacion">Abrir centro de moderación →</Link>}</div><div className="dashboard-actions"><Link className="text-link" href="/perfil/editar">Editar perfil</Link><Link className="text-link" href={`/vendedores/${claims.sub}`}>Mi perfil público</Link><Link className="text-link" href="/favoritos">Favoritos</Link><Link className="text-link" href="/mensajes">Mensajes</Link><Link className="text-link" href="/cuenta-bancaria">Datos bancarios</Link><Link className="button" href="/publicar">+ Publicar producto</Link></div></div>
         <section className="stat-grid">
           <article><span>Publicaciones activas</span><strong>{published.length}</strong><p>Productos visibles en el catálogo</p></article>
           <article><span>Borradores</span><strong>{drafts.length}</strong><p>Publicaciones pendientes de publicar</p></article>

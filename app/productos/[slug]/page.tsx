@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReportContentForm } from "@/components/report-content-form";
 import { SiteHeader } from "@/components/site-header";
+import { FavoriteButton } from "@/components/favorite-button";
+import { StartConversationButton } from "@/components/start-conversation-button";
 import { getProduct } from "@/lib/catalog";
 import { fromDatabaseProduct, fromSampleProduct, type DatabaseProduct } from "@/lib/listings";
 import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
@@ -16,7 +18,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   }
   let product = getProduct(slug) ? fromSampleProduct(getProduct(slug)!) : null;
   let sellerId: string | null = null;
-  let sellerProfile: { full_name: string; average_rating: number | string; review_count: number } | null = null;
+  let sellerProfile: { full_name: string; avatar_url?: string | null; average_rating: number | string; review_count: number } | null = null;
 
   if (!product && uuidPattern.test(slug)) {
     const supabase = await createClient();
@@ -53,9 +55,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <p className="detail-price">{product.price}</p>
             <p className="condition">Estado: <strong>{product.condition}</strong></p>
             <p className="detail-description">{product.description}</p>
-            {sellerId ? <Link className="seller-box seller-link" href={`/vendedores/${sellerId}`}><span className="avatar">{sellerName[0]}</span><div><strong>{sellerName}</strong><p>{sellerRating} · Ver perfil</p></div></Link> : <div className="seller-box"><span className="avatar">{sellerName[0]}</span><div><strong>{sellerName}</strong><p>Miembro de Marketplace Arqui</p></div></div>}
+            {sellerId ? <Link className="seller-box seller-link" href={`/vendedores/${sellerId}`}><span className="avatar" style={sellerProfile?.avatar_url ? { backgroundImage: `url("${sellerProfile.avatar_url}")` } : undefined}>{!sellerProfile?.avatar_url && sellerName[0]}</span><div><strong>{sellerName}</strong><p>{sellerRating} · Ver perfil</p></div></Link> : <div className="seller-box"><span className="avatar">{sellerName[0]}</span><div><strong>{sellerName}</strong><p>Miembro de Marketplace Arqui</p></div></div>}
+            {isDatabaseProduct && <div className="product-actions"><FavoriteButton productId={product.id} /><StartConversationButton productId={product.id} /></div>}
             <Link className="button full-button" href={isDatabaseProduct ? `/comprar/${product.id}` : "/acceder"}>Quiero comprar</Link>
-            <p className="payment-hint">Transferirás directamente al vendedor. Él revisará el comprobante que envíes.</p>
+            <p className="payment-hint">Pago por transferencia directa. El vendedor revisa el comprobante; la plataforma no procesa pagos ni confirma movimientos bancarios.</p>
             {isDatabaseProduct && <ReportContentForm targetId={product.id} targetType="product" />}
           </section>
         </div>
