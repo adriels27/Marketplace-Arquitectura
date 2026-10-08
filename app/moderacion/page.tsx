@@ -12,8 +12,8 @@ export default async function ModerationPage() {
 
   const { data: currentProfile } = await supabase.from("profiles").select("role, deleted_at, disabled_at").eq("id", userId).maybeSingle();
   if (currentProfile?.deleted_at || currentProfile?.disabled_at) notFound();
-  if (currentProfile?.role === "admin") redirect("/administracion/usuarios");
-  if (currentProfile?.role !== "moderator") redirect("/panel");
+  const isAdmin = currentProfile?.role === "admin";
+  if (!isAdmin && currentProfile?.role !== "moderator") redirect("/panel");
 
   const [profilesResult, productsResult, reviewsResult, reportsResult] = await Promise.all([
     supabase.from("moderation_profiles").select("id, email, full_name, role").order("created_at", { ascending: false }),
@@ -24,5 +24,5 @@ export default async function ModerationPage() {
     supabase.from("moderation_reports").select("id, reporter_id, target_type, target_id, category, description, status, created_at").neq("status", "resolved").order("created_at", { ascending: true }),
   ]);
 
-  return <><SiteHeader /><main className="admin-page moderation-page"><Link className="back-link" href="/panel">← Volver a mi panel</Link><section className="admin-heading"><p className="eyebrow">Moderación</p><h1>Centro de moderación</h1><p>Revisa reportes, contenido y advertencias.</p></section><ModerationConsole profiles={profilesResult.data ?? []} products={productsResult.data ?? []} reviews={reviewsResult.data ?? []} reports={reportsResult.data ?? []} isAdmin={false} /></main></>;
+  return <><SiteHeader /><main className="admin-page moderation-page"><Link className="back-link" href="/panel">← Volver a mi panel</Link><section className="admin-heading"><p className="eyebrow">Moderación</p><h1>Centro de moderación</h1><p>Revisa reportes, contenido y advertencias.</p></section><ModerationConsole profiles={profilesResult.data ?? []} products={productsResult.data ?? []} reviews={reviewsResult.data ?? []} reports={reportsResult.data ?? []} isAdmin={isAdmin} /></main></>;
 }

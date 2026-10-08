@@ -10,6 +10,7 @@ export function AdminHeader() {
       </Link>
       <nav aria-label="Administración">
         <Link href="/administracion/usuarios">Usuarios</Link>
+        <Link href="/moderacion">Moderación</Link>
         <LogoutButton />
       </nav>
     </header>

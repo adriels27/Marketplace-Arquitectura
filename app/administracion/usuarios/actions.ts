@@ -31,17 +31,30 @@ export async function createAdminUser(formData: FormData) {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const birthDate = String(formData.get("birthDate") ?? "");
   const password = String(formData.get("password") ?? "");
+  const role = String(formData.get("role") ?? "user");
+
   if (!email || !fullName || !birthDate || password.length < 8) {
     actionResult("error", "Completa todos los campos y usa una contraseña de al menos 8 caracteres.");
   }
+  if (role !== "user" && role !== "moderator") {
+    actionResult("error", "Rol inválido.");
+  }
 
-  const { error } = await admin!.auth.admin.createUser({
+  const { data, error } = await admin!.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
     user_metadata: { full_name: fullName, birth_date: birthDate },
   });
   if (error) actionResult("error", error.message);
+
+  if (role !== "user" && data?.user) {
+    const { error: profileError } = await admin!.from("profiles").update({ role }).eq("id", data.user.id);
+    if (profileError) {
+      actionResult("error", `Usuario creado pero hubo un error asignando el rol: ${profileError.message}`);
+    }
+  }
+
   actionResult("notice", "Usuario creado.");
 }
 
