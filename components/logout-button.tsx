@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function LogoutButton() {
+export function LogoutButton({ className = "logout-button" }: { className?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -15,5 +15,5 @@ export function LogoutButton() {
     router.refresh();
   }
 
-  return <button className="logout-button" disabled={loading} onClick={logout} type="button">{loading ? "Saliendo..." : "Cerrar sesión"}</button>;
+  return <button className={className} disabled={loading} onClick={logout} type="button">{loading ? "Saliendo..." : "Cerrar sesión"}</button>;
 }

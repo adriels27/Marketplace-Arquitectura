@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/logout-button";
+import { createClient } from "@/lib/supabase/server";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const isSignedIn = Boolean(claimsData?.claims?.sub);
+
   return (
     <header className="site-header">
       <Link className="brand" href="/">
@@ -12,7 +18,7 @@ export function SiteHeader() {
         <Link href="/panel">Mis publicaciones</Link>
         <Link href="/favoritos">Favoritos</Link>
         <Link href="/mensajes">Mensajes</Link>
-        <Link className="button button-small" href="/acceder">Ingresar</Link>
+        {isSignedIn ? <LogoutButton className="button button-small" /> : <Link className="button button-small" href="/acceder">Ingresar</Link>}
       </nav>
     </header>
   );
