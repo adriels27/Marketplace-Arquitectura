@@ -35,3 +35,67 @@
 .admin-header nav { gap: 1rem; }
 @media (min-width: 900px) { .moderation-item { grid-template-columns: minmax(0, 1fr) minmax(240px, .65fr); }.moderation-item > div:first-child { grid-row: span 3; }.moderation-item:has(.moderation-actions:nth-of-type(3)) { grid-template-columns: minmax(220px, .8fr) 1fr; } }
 @media (max-width: 600px) { .moderation-section { padding: 1rem; }.moderation-section .section-heading { align-items: start; flex-direction: column; gap: .5rem; }.moderation-actions { align-items: stretch; flex-direction: column; }.moderation-actions input, .moderation-actions select, .moderation-actions button { max-width: none; width: 100%; }.admin-create-user form { grid-template-columns: 1fr; }.admin-user-actions { align-items: stretch; flex-direction: column; } }
+
+/* Respeta automáticamente el tema configurado en el navegador. */
+:root { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #eef5f1;
+    --muted: #a9b9b1;
+    --paper: #101613;
+    --surface: #18211d;
+    --line: #34443b;
+    --accent: #70d0a0;
+    --accent-dark: #9ce7bd;
+  }
+
+  body { background: var(--paper); color: var(--ink); }
+  .site-header { background: rgba(24, 33, 29, .94); }
+  .hero-note { background: #1e4937; }
+  .categories a { background: var(--surface); border-color: var(--line); }
+  .categories a:first-child { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .search-box,
+  .product-card,
+  .seller-box,
+  .access-card,
+  .stat-grid article,
+  .dashboard-list,
+  .moderation-section,
+  .users-card,
+  .publish-card,
+  .purchase-card,
+  .conversation-list,
+  .chat-panel,
+  .review-card { background: var(--surface); border-color: var(--line); }
+  .search-box input,
+  .access-card input,
+  .publish-form input,
+  .publish-form select,
+  .publish-form textarea,
+  .payment-proof-form input,
+  .chat-form textarea,
+  .admin-create-user input,
+  .moderation-actions input,
+  .moderation-actions select,
+  .report-form input,
+  .report-form select,
+  .report-form textarea { background: #202c26; border-color: var(--line); color: var(--ink); }
+  .favorite-button { background: rgba(24, 33, 29, .94); border-color: var(--line); color: var(--ink); }
+  .favorite-error { background: var(--surface); border-color: var(--line); color: #ff9d9d; }
+  .button-secondary { background: #244b3b; color: #c1f3d5; }
+  .purchase-summary { background: #202c26; }
+  .chat-message { background: #26332d; }
+  .chat-message.own-message { background: #24533e; }
+  .form-message { background: #1e4937; color: #bdebd0; }
+  .admin-error { background: #4b2928; color: #ffc0b8; }
+  .reject-button { background: transparent; }
+  .buyer-review-form { background: #202c26; }
+  .status { background: #4a3b1b; color: #ffe49a; }
+  .status-published { background: #1e4937; color: #bdebd0; }
+  .status-draft { background: #4a3b1b; color: #ffe49a; }
+  .status-archived { background: #303934; color: #cbd5cf; }
+  .status-sold { background: #243f56; color: #b9dcf8; }
+  .payment-pending { background: #4a3b1b; color: #ffe49a; }
+  .payment-success { background: #1e4937; color: #bdebd0; }
+}
