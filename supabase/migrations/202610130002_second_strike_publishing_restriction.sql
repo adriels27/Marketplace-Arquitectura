@@ -1,5 +1,5 @@
 alter table public.moderation_warnings
-  add column strike_number smallint check (strike_number > 0);
+  add column if not exists strike_number smallint check (strike_number > 0);
 
 with numbered_strikes as (
   select id, row_number() over (partition by user_id order by created_at, id)::smallint as strike_number

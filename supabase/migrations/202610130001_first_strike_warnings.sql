@@ -1,6 +1,6 @@
 alter table public.moderation_warnings
-  add column product_id uuid references public.products(id) on delete set null,
-  add column product_title text;
+  add column if not exists product_id uuid references public.products(id) on delete set null,
+  add column if not exists product_title text;
 
 create or replace function public.moderate_product_action(
   p_product_id uuid,
