@@ -15,7 +15,7 @@ export async function SiteHeader() {
       </Link>
       <nav aria-label="Navegación principal">
         <Link href="/#explorar">Explorar</Link>
-        <Link href="/panel">Mis publicaciones</Link>
+        <Link href="/panel#publicaciones">Mis publicaciones</Link>
         <Link href="/favoritos">Favoritos</Link>
         <Link href="/mensajes">Mensajes</Link>
         {isSignedIn ? <LogoutButton className="button button-small" /> : <Link className="button button-small" href="/acceder">Ingresar</Link>}
