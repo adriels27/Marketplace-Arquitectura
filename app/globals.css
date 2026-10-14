@@ -32,6 +32,26 @@ main { margin: auto; max-width: 1240px; padding: 0 max(5vw, 2rem); }.hero { disp
 .purchase-page { display: grid; min-height: calc(100vh - 65px); padding-bottom: 4rem; padding-top: 3rem; place-items: start center; }.purchase-card { background: var(--surface); border: 1px solid var(--line); border-radius: 1.2rem; box-shadow: 0 20px 50px rgba(30,49,40,.08); max-width: 620px; padding: clamp(1.5rem, 4vw, 3rem); width: 100%; }.purchase-card h1 { font-family: Georgia, serif; font-size: clamp(2.3rem, 5vw, 3.4rem); font-weight: 500; margin: .5rem 0 1.5rem; }.purchase-summary { background: #f1f5ef; border-radius: .75rem; display: grid; gap: .3rem 1rem; grid-template-columns: 1fr auto; margin-bottom: 1.6rem; padding: 1rem; }.purchase-summary span { color: var(--muted); font-size: .82rem; }.purchase-summary strong { text-align: right; }.payment-card { border-top: 1px solid var(--line); margin-top: .5rem; padding-top: 1.5rem; }.payment-card h2 { font-family: Georgia, serif; font-size: 1.8rem; font-weight: 500; margin: .3rem 0 .6rem; }.payment-card-copy, .payment-proof-form p { color: var(--muted); font-size: .86rem; line-height: 1.5; }.payment-details { display: grid; gap: .7rem; margin: 1.4rem 0; }.payment-details div { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; padding-bottom: .7rem; }.payment-details dt { color: var(--muted); font-size: .8rem; }.payment-details dd { font-size: .88rem; font-weight: 700; margin: 0; text-align: right; }.payment-reference { color: var(--accent); letter-spacing: .08em; }.payment-proof-form { display: grid; gap: .8rem; }.payment-proof-form label { display: grid; font-size: .82rem; font-weight: 700; gap: .45rem; }.payment-proof-form input { border: 1px solid var(--line); border-radius: .6rem; font: inherit; padding: .7rem; }.payment-success { background: #e6f5e9; border-radius: .75rem; color: #155f39; margin-top: 1rem; padding: 1rem; }.payment-success p { font-size: .86rem; margin: .35rem 0 0; }.orders-section { margin-top: 1.3rem; }
 .explore-from-panel { padding-top: 4rem; }
 .listing-product-image { background-color: #e8eee9; background-position: center; background-size: cover; }
+.interest-notice { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line)); border-radius: .7rem; color: var(--ink); font-weight: 700; margin: 0 0 1rem; padding: .85rem 1rem; }
+.interest-badge { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--line)); border-radius: 999px; color: var(--accent); flex: 0 0 auto; font-size: .72rem; font-weight: 800; padding: .4rem .65rem; }
+.conversation-thumbnail { align-items: center; background-color: #26332d; background-position: center; background-size: cover; border-radius: .7rem; color: #abd9c3; display: flex; flex: 0 0 5rem; font-size: 2.5rem; height: 5rem; justify-content: center; position: relative; }
+.conversation-peer-avatar { border: 2px solid var(--surface); bottom: -.25rem; height: 1.8rem; position: absolute; right: -.25rem; width: 1.8rem; }
+.conversation-product-card { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1.25fr) minmax(220px, .75fr); margin: .5rem 0 1.25rem; overflow: hidden; padding: .85rem; }
+.conversation-product-image { align-items: center; aspect-ratio: 1.25 / 1; background-color: #26332d; background-position: center; background-size: cover; border-radius: .65rem; display: flex; font-family: Georgia, serif; font-size: 8rem; justify-content: center; min-height: 250px; }
+.conversation-product-placeholder { color: #abd9c3; }
+.conversation-product-copy { align-self: center; padding: 1rem; }
+.conversation-product-copy .eyebrow { margin-bottom: .65rem; }
+.conversation-product-copy h2 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; line-height: 1.08; margin: 0 0 1rem; overflow-wrap: anywhere; }
+.conversation-product-copy > strong { color: var(--accent); font-size: 1.6rem; }
+.conversation-product-card:hover { border-color: var(--accent); }
+@media (max-width: 700px) {
+  .conversation-product-card { grid-template-columns: 1fr; gap: .5rem; }
+  .conversation-product-image { aspect-ratio: 1.15 / 1; min-height: 0; }
+  .conversation-product-copy { padding: .7rem .35rem .5rem; }
+  .conversation-row { flex-wrap: wrap; }
+  .conversation-row > div { flex: 1 1 calc(100% - 4rem); }
+  .conversation-row .interest-badge { margin-left: 3.5rem; }
+}
 .publications-title-button { background: transparent; border: 0; color: var(--ink); cursor: pointer; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.1rem, 4vw, 3.3rem); font-weight: 500; letter-spacing: -.055em; line-height: 1.05; padding: 0; text-align: left; transition: color .18s ease, text-decoration-color .18s ease; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: .12em; }
 .publications-title-button:hover { color: var(--accent); text-decoration-color: currentColor; }
 .publications-title-button:focus-visible { border-radius: .15rem; outline: 3px solid rgba(18,107,77,.4); outline-offset: 5px; }
