@@ -54,7 +54,11 @@ export function AuthForm() {
         router.refresh();
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "No se pudo completar la solicitud.");
+      const errorCode = typeof error === "object" && error !== null && "code" in error ? error.code : null;
+      const errorMessage = error instanceof Error ? error.message : "";
+      setMessage(errorCode === "user_banned" || /user is banned|account.*banned/i.test(errorMessage)
+        ? "Tu cuenta fue baneada permanentemente después de recibir el tercer strike por infringir las normas. No puedes iniciar sesión."
+        : errorMessage || "No se pudo completar la solicitud.");
     } finally {
       setLoading(false);
     }
@@ -67,7 +71,7 @@ export function AuthForm() {
       <label>Correo electrónico<input required name="email" type="email" placeholder="tu@correo.com" autoComplete="email" /></label>
       <label>Contraseña<input required minLength={8} name="password" type="password" placeholder="Mínimo 8 caracteres" autoComplete={isSignup ? "new-password" : "current-password"} /></label>
       <button className="button full-button" disabled={loading} type="submit">{loading ? "Procesando..." : isSignup ? "Crear cuenta" : "Ingresar"}</button>
-      {message && <p className="form-message" role="status">{message}</p>}
+      {message && <p className={`form-message${message.startsWith("Tu cuenta fue baneada") ? " banned-account-notice" : ""}`} role={message.startsWith("Tu cuenta fue baneada") ? "alert" : "status"}>{message}</p>}
       {!isSignup && <p className="access-footer"><Link href="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link></p>}
       <p className="access-footer">
         {isSignup ? "¿Ya tienes cuenta?" : "¿Aún no tienes cuenta?"}{" "}

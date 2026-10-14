@@ -19,7 +19,7 @@ export default async function ModerationPage() {
     supabase.from("moderation_profiles").select("id, email, full_name, role").order("created_at", { ascending: false }),
     // "Eliminar" es un borrado lógico: se guarda para auditoría, pero no debe
     // volver a aparecer en la lista de contenido que el moderador puede gestionar.
-    supabase.from("products").select("id, title, seller_id, moderation_status, suspended_until").neq("moderation_status", "deleted").order("created_at", { ascending: false }).limit(100),
+    supabase.from("products").select("id, title, seller_id, moderation_status").neq("moderation_status", "deleted").order("created_at", { ascending: false }).limit(100),
     supabase.from("seller_reviews").select("id, comment, rating, seller_id, moderation_status").neq("moderation_status", "deleted").order("created_at", { ascending: false }).limit(100),
     supabase.from("moderation_reports").select("id, reporter_id, target_type, target_id, category, description, status, created_at").neq("status", "resolved").order("created_at", { ascending: true }),
   ]);

@@ -2,10 +2,11 @@
 
 import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { deleteModeratedProduct } from "@/app/moderacion/actions";
 import { createClient } from "@/lib/supabase/client";
 
 type Profile = { id: string; email: string; full_name: string | null; role: string };
-type Product = { id: string; title: string; seller_id: string; moderation_status: string; suspended_until: string | null };
+type Product = { id: string; title: string; seller_id: string; moderation_status: string };
 type Review = { id: string; comment: string; rating: number; seller_id: string; moderation_status: string };
 type Report = { id: string; reporter_id: string; target_type: "product" | "review"; target_id: string; category: string; description: string; status: string; created_at: string };
 
@@ -37,15 +38,10 @@ export function ModerationConsole({ profiles, products, reviews, reports, isAdmi
     await runAction(`warning-${userId}`, () => createClient().rpc("send_moderation_warning", { p_user_id: userId, p_reason: reason }));
   }
 
-  async function submitProductAction(event: FormEvent<HTMLFormElement>, productId: string, action: "hide" | "delete" | "suspend") {
+  async function submitProductAction(event: FormEvent<HTMLFormElement>, productId: string) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    await runAction(`${action}-${productId}`, () => createClient().rpc("moderate_product_action", {
-      p_product_id: productId,
-      p_action: action,
-      p_reason: String(form.get("reason")).trim(),
-      p_duration_hours: action === "suspend" ? Number(form.get("duration")) : null,
-    }));
+    await runAction(`delete-${productId}`, () => deleteModeratedProduct(productId, String(form.get("reason")).trim()));
   }
 
   async function submitReviewAction(event: FormEvent<HTMLFormElement>, reviewId: string, action: "hide" | "delete") {
@@ -88,10 +84,8 @@ export function ModerationConsole({ profiles, products, reviews, reports, isAdmi
       <section className="moderation-section">
         <div className="section-heading"><div><p className="eyebrow">Catálogo</p><h2>Publicaciones</h2></div></div>
         {products.length ? <div className="moderation-list">{products.map((product) => <article className="moderation-item" key={product.id}>
-          <div><strong>{product.title}</strong><p>Estado de moderación: {product.moderation_status}{product.suspended_until ? ` · hasta ${new Date(product.suspended_until).toLocaleString("es-EC")}` : ""}</p></div>
-          <form className="moderation-actions" onSubmit={(event) => submitProductAction(event, product.id, "hide")}><input aria-label="Motivo para ocultar" name="reason" minLength={10} maxLength={1000} placeholder="Motivo (mín. 10 caracteres)" required /><button className="text-button" disabled={busy !== null} type="submit">Ocultar</button></form>
-          <form className="moderation-actions" onSubmit={(event) => submitProductAction(event, product.id, "suspend")}><input aria-label="Motivo para suspender" name="reason" minLength={10} maxLength={1000} placeholder="Motivo de suspensión" required /><select aria-label="Duración de la suspensión" name="duration" defaultValue="24"><option value="24">24 horas</option><option value="72">3 días</option><option value="168">7 días</option><option value="720">30 días</option></select><button className="text-button" disabled={busy !== null} type="submit">Suspender</button></form>
-          <form className="moderation-actions" onSubmit={(event) => submitProductAction(event, product.id, "delete")}><input aria-label="Motivo para eliminar" name="reason" minLength={10} maxLength={1000} placeholder="Motivo para retirar" required /><button className="reject-button" disabled={busy !== null} type="submit">Eliminar</button></form>
+          <div><strong>{product.title}</strong><p>Estado de moderación: {product.moderation_status}</p></div>
+          <form className="moderation-actions" onSubmit={(event) => submitProductAction(event, product.id)}><input aria-label="Motivo para eliminar" name="reason" minLength={10} maxLength={1000} placeholder="Motivo para retirar" required /><button className="reject-button" disabled={busy !== null} type="submit">Eliminar</button></form>
         </article>)}</div> : <p className="empty-state">No hay publicaciones para moderar.</p>}
       </section>
 

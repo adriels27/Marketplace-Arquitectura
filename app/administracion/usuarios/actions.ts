@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { setSupabaseUserEnabled } from "@/lib/supabase/user-status";
 
 async function requireSuperadmin() {
   const supabase = await createClient();
@@ -70,12 +71,8 @@ export async function setAdminUserEnabled(formData: FormData) {
   const enabled = String(formData.get("enabled")) === "true";
   if (!userId || userId === context!.userId) actionResult("error", "No puedes cambiar el estado de tu propia cuenta.");
 
-  const { error } = await context!.admin.auth.admin.updateUserById(userId, { ban_duration: enabled ? "none" : "876000h" });
-  if (error) actionResult("error", error.message);
-  const { error: profileError } = await context!.admin.from("profiles").update({
-    disabled_at: enabled ? null : new Date().toISOString(),
-  }).eq("id", userId);
-  if (profileError) actionResult("error", `El estado de Auth cambió, pero no se pudo sincronizar el perfil: ${profileError.message}`);
+  const error = await setSupabaseUserEnabled(context!.admin, userId, enabled);
+  if (error) actionResult("error", error);
   actionResult("notice", enabled ? "Cuenta habilitada." : "Cuenta deshabilitada.");
 }
 
