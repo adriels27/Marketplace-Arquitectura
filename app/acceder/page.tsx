@@ -4,20 +4,25 @@ import { cookies } from "next/headers";
 import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function AccessPage() {
+export default async function AccessPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ modo?: string; mode?: string }>;
+}) {
   await cookies();
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
     await redirectSuperadminFromMarketplace(await createClient());
   }
+
+  const params = searchParams ? await searchParams : {};
+  const isRegister = params.modo === "registro" || params.mode === "signup" || params.mode === "register";
+
   return (
     <>
       <SiteHeader />
       <main className="access-page">
         <section className="access-card">
-          <p className="eyebrow">Bienvenido</p>
-          <h1>Ingresa a tu cuenta</h1>
-          <p>Compra, vende y administra tus publicaciones en un solo lugar.</p>
-          <AuthForm />
+          <AuthForm initialMode={isRegister ? "signup" : "signin"} />
         </section>
       </main>
     </>

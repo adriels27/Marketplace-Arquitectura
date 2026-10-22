@@ -4,9 +4,14 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/server";
 
 export async function SiteHeader() {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const isSignedIn = Boolean(claimsData?.claims?.sub);
+  let isSignedIn = false;
+  try {
+    const supabase = await createClient();
+    const { data: claimsData } = await supabase.auth.getClaims();
+    isSignedIn = Boolean(claimsData?.claims?.sub);
+  } catch {
+    isSignedIn = false;
+  }
 
   return (
     <header className="site-header">
@@ -15,11 +20,24 @@ export async function SiteHeader() {
         <span>Marketplace Arqui</span>
       </Link>
       <nav aria-label="Navegación principal">
-        <Link href="/#explorar">Explorar</Link>
-        <Link href="/panel#publicaciones">Mis publicaciones</Link>
-        <Link href="/favoritos">Favoritos</Link>
-        <Link href="/mensajes">Mensajes</Link>
-        {isSignedIn ? <LogoutButton className="button button-small" /> : <Link className="button button-small" href="/acceder">Ingresar</Link>}
+        {isSignedIn ? (
+          <>
+            <Link href="/#explorar">Explorar</Link>
+            <Link href="/panel#publicaciones">Mis publicaciones</Link>
+            <Link href="/favoritos">Favoritos</Link>
+            <Link href="/mensajes">Mensajes</Link>
+            <LogoutButton className="button button-small" />
+          </>
+        ) : (
+          <>
+            <Link className="nav-register-link" href="/acceder?modo=registro">
+              Registrarse
+            </Link>
+            <Link className="button button-small" href="/acceder">
+              Iniciar sesión
+            </Link>
+          </>
+        )}
         <ThemeToggle />
       </nav>
     </header>
