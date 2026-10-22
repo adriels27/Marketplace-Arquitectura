@@ -48,10 +48,23 @@
 @media (min-width: 900px) { .moderation-item { grid-template-columns: minmax(0, 1fr) minmax(240px, .65fr); }.moderation-item > div:first-child { grid-row: span 3; }.moderation-item:has(.moderation-actions:nth-of-type(3)) { grid-template-columns: minmax(220px, .8fr) 1fr; } }
 @media (max-width: 600px) { .moderation-section { padding: 1rem; }.moderation-section .section-heading { align-items: start; flex-direction: column; gap: .5rem; }.moderation-actions { align-items: stretch; flex-direction: column; }.moderation-actions input, .moderation-actions select, .moderation-actions button { max-width: none; width: 100%; }.admin-create-user form { grid-template-columns: 1fr; }.admin-user-actions { align-items: stretch; flex-direction: column; } }
 
-/* Respeta automáticamente el tema configurado en el navegador. */
+/* Respeta automáticamente el tema configurado en el navegador o la selección manual con data-theme */
 :root { color-scheme: light; }
+[data-theme="light"] { color-scheme: light; }
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #eef5f1;
+  --muted: #a9b9b1;
+  --paper: #101613;
+  --surface: #18211d;
+  --line: #34443b;
+  --accent: #70d0a0;
+  --accent-dark: #9ce7bd;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --ink: #eef5f1;
     --muted: #a9b9b1;
@@ -61,55 +74,109 @@
     --accent: #70d0a0;
     --accent-dark: #9ce7bd;
   }
-
-  body { background: var(--paper); color: var(--ink); }
-  .site-header { background: rgba(24, 33, 29, .94); }
-  .hero-note { background: #1e4937; }
-  .categories a { background: var(--surface); border-color: var(--line); }
-  .categories a:first-child { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-  .search-box,
-  .product-card,
-  .seller-box,
-  .access-card,
-  .stat-grid article,
-  .dashboard-list,
-  .moderation-section,
-  .users-card,
-  .publish-card,
-  .purchase-card,
-  .conversation-list,
-  .chat-panel,
-  .review-card { background: var(--surface); border-color: var(--line); }
-  .search-box input,
-  .access-card input,
-  .publish-form input,
-  .publish-form select,
-  .publish-form textarea,
-  .payment-proof-form input,
-  .chat-form textarea,
-  .admin-create-user input,
-  .moderation-actions input,
-  .moderation-actions select,
-  .report-form input,
-  .report-form select,
-  .report-form textarea { background: #202c26; border-color: var(--line); color: var(--ink); }
-  .favorite-button { background: rgba(24, 33, 29, .94); border-color: var(--line); color: var(--ink); }
-  .favorite-error { background: var(--surface); border-color: var(--line); color: #ff9d9d; }
-  .button-secondary { background: #244b3b; color: #c1f3d5; }
-  .purchase-summary { background: #202c26; }
-  .chat-message { background: #26332d; }
-  .chat-message.own-message { background: #24533e; }
-  .form-message { background: #1e4937; color: #bdebd0; }
-  .admin-error { background: #4b2928; color: #ffc0b8; }
-  .warning-notice { background: #3f341f; border-color: #806830; }
-  .warning-notice strong { color: #ffdf91; }
-  .reject-button { background: transparent; }
-  .buyer-review-form { background: #202c26; }
-  .status { background: #4a3b1b; color: #ffe49a; }
-  .status-published { background: #1e4937; color: #bdebd0; }
-  .status-draft { background: #4a3b1b; color: #ffe49a; }
-  .status-archived { background: #303934; color: #cbd5cf; }
-  .status-sold { background: #243f56; color: #b9dcf8; }
-  .payment-pending { background: #4a3b1b; color: #ffe49a; }
-  .payment-success { background: #1e4937; color: #bdebd0; }
 }
+
+[data-theme="dark"] body { background: var(--paper); color: var(--ink); }
+[data-theme="dark"] .site-header { background: rgba(24, 33, 29, .94); }
+[data-theme="dark"] .hero-note { background: #1e4937; }
+[data-theme="dark"] .categories a { background: var(--surface); border-color: var(--line); }
+[data-theme="dark"] .categories a:first-child { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+[data-theme="dark"] .search-box,
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .seller-box,
+[data-theme="dark"] .access-card,
+[data-theme="dark"] .stat-grid article,
+[data-theme="dark"] .dashboard-list,
+[data-theme="dark"] .moderation-section,
+[data-theme="dark"] .users-card,
+[data-theme="dark"] .publish-card,
+[data-theme="dark"] .purchase-card,
+[data-theme="dark"] .conversation-list,
+[data-theme="dark"] .chat-panel,
+[data-theme="dark"] .review-card { background: var(--surface); border-color: var(--line); }
+[data-theme="dark"] .search-box input,
+[data-theme="dark"] .access-card input,
+[data-theme="dark"] .publish-form input,
+[data-theme="dark"] .publish-form select,
+[data-theme="dark"] .publish-form textarea,
+[data-theme="dark"] .payment-proof-form input,
+[data-theme="dark"] .chat-form textarea,
+[data-theme="dark"] .admin-create-user input,
+[data-theme="dark"] .moderation-actions input,
+[data-theme="dark"] .moderation-actions select,
+[data-theme="dark"] .report-form input,
+[data-theme="dark"] .report-form select,
+[data-theme="dark"] .report-form textarea { background: #202c26; border-color: var(--line); color: var(--ink); }
+[data-theme="dark"] .favorite-button { background: rgba(24, 33, 29, .94); border-color: var(--line); color: var(--ink); }
+[data-theme="dark"] .favorite-error { background: var(--surface); border-color: var(--line); color: #ff9d9d; }
+[data-theme="dark"] .button-secondary { background: #244b3b; color: #c1f3d5; }
+[data-theme="dark"] .purchase-summary { background: #202c26; }
+[data-theme="dark"] .chat-message { background: #26332d; }
+[data-theme="dark"] .chat-message.own-message { background: #24533e; }
+[data-theme="dark"] .form-message { background: #1e4937; color: #bdebd0; }
+[data-theme="dark"] .admin-error { background: #4b2928; color: #ffc0b8; }
+[data-theme="dark"] .warning-notice { background: #3f341f; border-color: #806830; }
+[data-theme="dark"] .warning-notice strong { color: #ffdf91; }
+[data-theme="dark"] .reject-button { background: transparent; }
+[data-theme="dark"] .buyer-review-form { background: #202c26; }
+[data-theme="dark"] .status { background: #4a3b1b; color: #ffe49a; }
+[data-theme="dark"] .status-published { background: #1e4937; color: #bdebd0; }
+[data-theme="dark"] .status-draft { background: #4a3b1b; color: #ffe49a; }
+[data-theme="dark"] .status-archived { background: #303934; color: #cbd5cf; }
+[data-theme="dark"] .status-sold { background: #243f56; color: #b9dcf8; }
+[data-theme="dark"] .payment-pending { background: #4a3b1b; color: #ffe49a; }
+[data-theme="dark"] .payment-success { background: #1e4937; color: #bdebd0; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body { background: var(--paper); color: var(--ink); }
+  :root:not([data-theme="light"]) .site-header { background: rgba(24, 33, 29, .94); }
+  :root:not([data-theme="light"]) .hero-note { background: #1e4937; }
+  :root:not([data-theme="light"]) .categories a { background: var(--surface); border-color: var(--line); }
+  :root:not([data-theme="light"]) .categories a:first-child { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  :root:not([data-theme="light"]) .search-box,
+  :root:not([data-theme="light"]) .product-card,
+  :root:not([data-theme="light"]) .seller-box,
+  :root:not([data-theme="light"]) .access-card,
+  :root:not([data-theme="light"]) .stat-grid article,
+  :root:not([data-theme="light"]) .dashboard-list,
+  :root:not([data-theme="light"]) .moderation-section,
+  :root:not([data-theme="light"]) .users-card,
+  :root:not([data-theme="light"]) .publish-card,
+  :root:not([data-theme="light"]) .purchase-card,
+  :root:not([data-theme="light"]) .conversation-list,
+  :root:not([data-theme="light"]) .chat-panel,
+  :root:not([data-theme="light"]) .review-card { background: var(--surface); border-color: var(--line); }
+  :root:not([data-theme="light"]) .search-box input,
+  :root:not([data-theme="light"]) .access-card input,
+  :root:not([data-theme="light"]) .publish-form input,
+  :root:not([data-theme="light"]) .publish-form select,
+  :root:not([data-theme="light"]) .publish-form textarea,
+  :root:not([data-theme="light"]) .payment-proof-form input,
+  :root:not([data-theme="light"]) .chat-form textarea,
+  :root:not([data-theme="light"]) .admin-create-user input,
+  :root:not([data-theme="light"]) .moderation-actions input,
+  :root:not([data-theme="light"]) .moderation-actions select,
+  :root:not([data-theme="light"]) .report-form input,
+  :root:not([data-theme="light"]) .report-form select,
+  :root:not([data-theme="light"]) .report-form textarea { background: #202c26; border-color: var(--line); color: var(--ink); }
+  :root:not([data-theme="light"]) .favorite-button { background: rgba(24, 33, 29, .94); border-color: var(--line); color: var(--ink); }
+  :root:not([data-theme="light"]) .favorite-error { background: var(--surface); border-color: var(--line); color: #ff9d9d; }
+  :root:not([data-theme="light"]) .button-secondary { background: #244b3b; color: #c1f3d5; }
+  :root:not([data-theme="light"]) .purchase-summary { background: #202c26; }
+  :root:not([data-theme="light"]) .chat-message { background: #26332d; }
+  :root:not([data-theme="light"]) .chat-message.own-message { background: #24533e; }
+  :root:not([data-theme="light"]) .form-message { background: #1e4937; color: #bdebd0; }
+  :root:not([data-theme="light"]) .admin-error { background: #4b2928; color: #ffc0b8; }
+  :root:not([data-theme="light"]) .warning-notice { background: #3f341f; border-color: #806830; }
+  :root:not([data-theme="light"]) .warning-notice strong { color: #ffdf91; }
+  :root:not([data-theme="light"]) .reject-button { background: transparent; }
+  :root:not([data-theme="light"]) .buyer-review-form { background: #202c26; }
+  :root:not([data-theme="light"]) .status { background: #4a3b1b; color: #ffe49a; }
+  :root:not([data-theme="light"]) .status-published { background: #1e4937; color: #bdebd0; }
+  :root:not([data-theme="light"]) .status-draft { background: #4a3b1b; color: #ffe49a; }
+  :root:not([data-theme="light"]) .status-archived { background: #303934; color: #cbd5cf; }
+  :root:not([data-theme="light"]) .status-sold { background: #243f56; color: #b9dcf8; }
+  :root:not([data-theme="light"]) .payment-pending { background: #4a3b1b; color: #ffe49a; }
+  :root:not([data-theme="light"]) .payment-success { background: #1e4937; color: #bdebd0; }
+}
+

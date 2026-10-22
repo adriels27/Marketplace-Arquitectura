@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/server";
 
 export async function SiteHeader() {
@@ -19,6 +20,7 @@ export async function SiteHeader() {
         <Link href="/favoritos">Favoritos</Link>
         <Link href="/mensajes">Mensajes</Link>
         {isSignedIn ? <LogoutButton className="button button-small" /> : <Link className="button button-small" href="/acceder">Ingresar</Link>}
+        <ThemeToggle />
       </nav>
     </header>
   );

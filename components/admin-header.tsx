@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AdminHeader() {
   return (
@@ -12,6 +13,7 @@ export function AdminHeader() {
         <Link href="/administracion/usuarios">Usuarios</Link>
         <Link href="/moderacion">Moderación</Link>
         <LogoutButton />
+        <ThemeToggle />
       </nav>
     </header>
   );
