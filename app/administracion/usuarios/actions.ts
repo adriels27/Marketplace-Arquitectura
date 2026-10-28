@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { setSupabaseUserEnabled } from "@/lib/supabase/user-status";
+import { isAllowedAccountEmail } from "@/lib/email";
 
 async function requireSuperadmin() {
   const supabase = await createClient();
@@ -36,6 +37,9 @@ export async function createAdminUser(formData: FormData) {
 
   if (!email || !fullName || !birthDate || password.length < 8) {
     actionResult("error", "Completa todos los campos y usa una contraseña de al menos 8 caracteres.");
+  }
+  if (!isAllowedAccountEmail(email)) {
+    actionResult("error", "Usa un correo de Gmail, Hotmail, Outlook o Yahoo.");
   }
   if (role !== "user" && role !== "moderator") {
     actionResult("error", "Rol inválido.");

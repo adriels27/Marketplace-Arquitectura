@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { isAllowedAccountEmail } from "@/lib/email";
 
 interface AuthFormProps {
   initialMode?: "signin" | "signup";
@@ -30,8 +31,10 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
     const birthDate = String(form.get("birthDate") ?? "");
 
     try {
-      const supabase = createClient();
       if (mode === "signup") {
+        if (!isAllowedAccountEmail(email)) {
+          throw new Error("Usa un correo de Gmail, Hotmail, Outlook o Yahoo.");
+        }
         const enteredDate = new Date(`${birthDate}T00:00:00`);
         const today = new Date();
         const age = today.getFullYear() - enteredDate.getFullYear() - (today < new Date(today.getFullYear(), enteredDate.getMonth(), enteredDate.getDate()) ? 1 : 0);
@@ -41,6 +44,7 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
         if (age < 18) {
           throw new Error("Debes tener al menos 18 años para crear una cuenta.");
         }
+        const supabase = createClient();
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -52,6 +56,7 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
         if (error) throw error;
         setMessage("Revisa tu correo para confirmar la cuenta y luego podrás ingresar.");
       } else {
+        const supabase = createClient();
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         const { data: userData } = await supabase.auth.getUser();
@@ -81,6 +86,7 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
       <form onSubmit={handleSubmit}>
         {isSignup && <><label>Nombre completo<input required name="fullName" minLength={2} maxLength={120} type="text" placeholder="Tu nombre y apellido" autoComplete="name" /></label><label>Fecha de nacimiento<input required name="birthDate" type="date" autoComplete="bday" /></label><p className="form-help">Debes tener al menos 18 años para crear una cuenta.</p></>}
         <label>Correo electrónico<input required name="email" type="email" placeholder="tu@correo.com" autoComplete="email" /></label>
+        {isSignup && <p className="form-help">Para crear una cuenta, usa Gmail, Hotmail, Outlook o Yahoo.</p>}
         <label>Contraseña<input required minLength={8} name="password" type="password" placeholder="Mínimo 8 caracteres" autoComplete={isSignup ? "new-password" : "current-password"} /></label>
         <button className="button full-button" disabled={loading} type="submit">{loading ? "Procesando..." : isSignup ? "Crear cuenta" : "Ingresar"}</button>
         {message && <p className={`form-message${message.startsWith("Tu cuenta fue baneada") ? " banned-account-notice" : ""}`} role={message.startsWith("Tu cuenta fue baneada") ? "alert" : "status"}>{message}</p>}
