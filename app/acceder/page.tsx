@@ -22,7 +22,7 @@ export default async function AccessPage({
       <SiteHeader />
       <main className="access-page">
         <section className="access-card">
-          <AuthForm initialMode={isRegister ? "signup" : "signin"} />
+          <AuthForm key={isRegister ? "signup" : "signin"} initialMode={isRegister ? "signup" : "signin"} />
         </section>
       </main>
     </>
