@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { setSupabaseUserEnabled } from "@/lib/supabase/user-status";
-import { isAllowedAccountEmail } from "@/lib/email";
+import { normalizeAccountEmail, validateAccountEmail } from "@/lib/email";
 
 async function requireSuperadmin() {
   const supabase = await createClient();
@@ -29,18 +29,20 @@ export async function createAdminUser(formData: FormData) {
     actionResult("error", error instanceof Error ? error.message : "No se pudo validar al Superadministrador.");
   }
 
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const rawEmail = String(formData.get("email") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
   const birthDate = String(formData.get("birthDate") ?? "");
   const password = String(formData.get("password") ?? "");
   const role = String(formData.get("role") ?? "user");
 
-  if (!email || !fullName || !birthDate || password.length < 8) {
+  if (!rawEmail || !fullName || !birthDate || password.length < 8) {
     actionResult("error", "Completa todos los campos y usa una contraseña de al menos 8 caracteres.");
   }
-  if (!isAllowedAccountEmail(email)) {
-    actionResult("error", "Usa un correo de Gmail, Hotmail, Outlook o Yahoo.");
+  const emailValidation = validateAccountEmail(rawEmail);
+  if (!emailValidation.valid) {
+    actionResult("error", emailValidation.error || "Usa un correo de Gmail, Hotmail, Outlook o Yahoo.");
   }
+  const email = emailValidation.normalizedEmail || normalizeAccountEmail(rawEmail);
   if (role !== "user" && role !== "moderator") {
     actionResult("error", "Rol inválido.");
   }

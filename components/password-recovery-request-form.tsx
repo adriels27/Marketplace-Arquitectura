@@ -2,6 +2,7 @@
 
 import { type FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { normalizeAccountEmail } from "@/lib/email";
 
 export function PasswordRecoveryRequestForm() {
   const [message, setMessage] = useState<string | null>(null);
@@ -10,7 +11,8 @@ export function PasswordRecoveryRequestForm() {
   async function requestRecovery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true); setMessage(null);
-    const email = String(new FormData(event.currentTarget).get("email") ?? "").trim();
+    const rawEmail = String(new FormData(event.currentTarget).get("email") ?? "");
+    const email = normalizeAccountEmail(rawEmail);
     const { error } = await createClient().auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/restablecer-contrasena`,
     });

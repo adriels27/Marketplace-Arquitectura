@@ -4,7 +4,7 @@ import { type FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { isAllowedAccountEmail } from "@/lib/email";
+import { normalizeAccountEmail, validateAccountEmail } from "@/lib/email";
 
 interface AuthFormProps {
   initialMode?: "signin" | "signup";
@@ -21,15 +21,17 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
     setMessage(null);
     setLoading(true);
     const form = new FormData(event.currentTarget);
-    const email = String(form.get("email"));
-    const password = String(form.get("password"));
+    const rawEmail = String(form.get("email") ?? "");
+    const email = normalizeAccountEmail(rawEmail);
+    const password = String(form.get("password") ?? "");
     const fullName = String(form.get("fullName") ?? "").trim();
     const birthDate = String(form.get("birthDate") ?? "");
 
     try {
       if (mode === "signup") {
-        if (!isAllowedAccountEmail(email)) {
-          throw new Error("Usa un correo de Gmail, Hotmail, Outlook o Yahoo.");
+        const validation = validateAccountEmail(rawEmail);
+        if (!validation.valid) {
+          throw new Error(validation.error || "Usa un correo de Gmail, Hotmail, Outlook o Yahoo.");
         }
         const enteredDate = new Date(`${birthDate}T00:00:00`);
         const today = new Date();
@@ -42,7 +44,7 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
         }
         const supabase = createClient();
         const { error } = await supabase.auth.signUp({
-          email,
+          email: validation.normalizedEmail || email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/panel`,
@@ -82,7 +84,7 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
       <form onSubmit={handleSubmit}>
         {isSignup && <><label>Nombre completo<input required name="fullName" minLength={2} maxLength={120} type="text" placeholder="Tu nombre y apellido" autoComplete="name" /></label><label>Fecha de nacimiento<input required name="birthDate" type="date" autoComplete="bday" /></label><p className="form-help">Debes tener al menos 18 años para crear una cuenta.</p></>}
         <label>Correo electrónico<input required name="email" type="email" placeholder="tu@correo.com" autoComplete="email" /></label>
-        {isSignup && <p className="form-help">Para crear una cuenta, usa Gmail, Hotmail, Outlook o Yahoo.</p>}
+        {isSignup && <p className="form-help">Para crear una cuenta, usa Gmail, Hotmail, Outlook o Yahoo (solo letras, números, puntos, guiones y sin tildes).</p>}
         <label>Contraseña<input required minLength={8} name="password" type="password" placeholder="Mínimo 8 caracteres" autoComplete={isSignup ? "new-password" : "current-password"} /></label>
         <button className="button full-button" disabled={loading} type="submit">{loading ? "Procesando..." : isSignup ? "Crear cuenta" : "Ingresar"}</button>
         {message && <p className={`form-message${message.startsWith("Tu cuenta fue baneada") ? " banned-account-notice" : ""}`} role={message.startsWith("Tu cuenta fue baneada") ? "alert" : "status"}>{message}</p>}
