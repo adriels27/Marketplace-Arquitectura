@@ -18,9 +18,11 @@ export function SiteFooter() {
             <li>José Gabriel Álava Barcia</li>
           </ul>
         </section>
-        <p className="site-footer-line"><strong>DOCENTE:</strong> Carlos Eduardo Anchundia Betancourt</p>
-        <p className="site-footer-line"><strong>PERÍODO ACADÉMICO:</strong> 2026-2</p>
-        <p className="site-footer-location">MANTA – MANABÍ – ECUADOR</p>
+        <div className="site-footer-meta">
+          <p className="site-footer-line"><strong>DOCENTE:</strong> Carlos Eduardo Anchundia Betancourt</p>
+          <p className="site-footer-line"><strong>PERÍODO ACADÉMICO:</strong> 2026-2</p>
+          <p className="site-footer-location">MANTA – MANABÍ – ECUADOR</p>
+        </div>
       </div>
     </footer>
   );
