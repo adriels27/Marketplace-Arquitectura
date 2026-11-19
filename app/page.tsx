@@ -79,7 +79,6 @@ export default async function Home() {
           </ol>
         </section>
       </main>
-      <footer>Marketplace Arqui <span>·</span> Compra y venta entre personas</footer>
     </>
   );
 }
