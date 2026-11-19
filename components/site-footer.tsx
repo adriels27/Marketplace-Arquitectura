@@ -7,7 +7,6 @@ export function SiteFooter() {
           <div><dt>CARRERA</dt><dd>Ingeniería en Software – 5.º Nivel</dd></div>
           <div><dt>PARALELO</dt><dd>B</dd></div>
           <div><dt>ASIGNATURA</dt><dd>Arquitectura de Software</dd></div>
-          <div><dt>TEMA</dt><dd>Buenas prácticas en la documentación de software</dd></div>
         </dl>
         <section className="site-footer-authors" aria-labelledby="site-footer-authors-title">
           <p className="site-footer-label" id="site-footer-authors-title">AUTORES</p>
