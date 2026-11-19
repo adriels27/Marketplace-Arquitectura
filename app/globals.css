@@ -106,8 +106,17 @@ main { margin: auto; max-width: 1240px; padding: 0 max(5vw, 2rem); }.hero { disp
 .share-button { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); }
 .share-button:hover { background: #edf5f0; }
 .share-feedback { color: var(--muted); display: block; font-size: .78rem; min-height: 1.2rem; padding-top: .35rem; text-align: center; }
-.site-footer { color: var(--muted); font-size: .8rem; padding: 2.2rem max(5vw, 2rem); text-align: center; }
-.site-footer-brand { margin: 0; }
-.site-footer-brand span { margin: 0 .6rem; }
-.site-footer-team { display: flex; flex-wrap: wrap; gap: .35rem 1rem; justify-content: center; list-style: none; margin: .8rem 0 0; padding: 0; }
-.site-footer-team li { font-size: .7rem; line-height: 1.5; }
+.site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .76rem; padding: 2.2rem max(5vw, 2rem); text-align: center; }
+.site-footer-content { margin: 0 auto; max-width: 920px; }
+.site-footer-institution, .site-footer-label { color: var(--ink); font-weight: 800; letter-spacing: .035em; margin: 0; }
+.site-footer-institution { font-size: .82rem; }
+.site-footer-details { display: grid; gap: .65rem 1.4rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1rem auto 0; max-width: 800px; text-align: left; }
+.site-footer-details div { display: flex; flex-wrap: wrap; gap: .2rem .45rem; }
+.site-footer-details dt, .site-footer-line strong { color: var(--accent); font-weight: 800; }
+.site-footer-details dd { margin: 0; }
+.site-footer-authors { margin-top: 1rem; }
+.site-footer-team { display: flex; flex-wrap: wrap; gap: .35rem 1rem; justify-content: center; list-style: none; margin: .45rem 0 0; padding: 0; }
+.site-footer-team li { font-size: .72rem; line-height: 1.5; }
+.site-footer-line { margin: .65rem 0 0; }
+.site-footer-location { color: var(--ink); font-size: .72rem; font-weight: 800; letter-spacing: .08em; margin: 1rem 0 0; }
+@media (max-width: 620px) { .site-footer-details { grid-template-columns: 1fr; text-align: center; }.site-footer-details div { justify-content: center; } }
