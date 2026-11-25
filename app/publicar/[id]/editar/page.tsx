@@ -14,7 +14,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   const [{ data: product }, { data: images }] = await Promise.all([
     supabase.from("products").select("id, title, description, price_cents, category, item_condition, location, status").eq("id", id).maybeSingle(),
-    supabase.from("product_images").select("id, storage_path, position").eq("product_id", id).order("position").limit(1),
+    supabase.from("product_images").select("id, storage_path, position").eq("product_id", id).order("position").order("created_at").order("id").limit(1),
   ]);
   if (!product) notFound();
 
@@ -27,7 +27,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           <p className="eyebrow">Editar publicación</p>
           <h1>Actualiza tu producto</h1>
           <p>Los cambios se verán en el catálogo cuando la publicación esté marcada como publicada.</p>
-          <EditProductForm product={product} currentImage={image ? { id: image.id, storagePath: image.storage_path, url: publicImageUrl(image.storage_path) ?? "" } : undefined} />
+          <EditProductForm product={product} currentImage={image ? { id: image.id, url: publicImageUrl(image.storage_path) ?? "" } : undefined} />
         </section>
       </main>
     </>

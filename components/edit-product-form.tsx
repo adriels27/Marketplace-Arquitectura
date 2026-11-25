@@ -18,7 +18,7 @@ type EditableProduct = {
   status: "draft" | "published" | "archived";
 };
 
-type CurrentImage = { id: string; storagePath: string; url: string };
+type CurrentImage = { id: string; url: string };
 
 export function EditProductForm({ product, currentImage }: { product: EditableProduct; currentImage?: CurrentImage }) {
   const router = useRouter();
@@ -49,44 +49,46 @@ export function EditProductForm({ product, currentImage }: { product: EditablePr
 
     try {
       const supabase = createClient();
-      const { error: productError } = await supabase.from("products").update({
-        title: String(form.get("title")).trim(),
-        description: String(form.get("description")).trim(),
-        price_cents: Math.round(amount * 100),
-        category: String(form.get("category")),
-        item_condition: String(form.get("condition")),
-        location: String(form.get("location")).trim(),
-        status: String(form.get("status")),
-      }).eq("id", product.id);
-      if (productError) throw productError;
-
+      let storagePath: string | null = null;
       if (photo) {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        if (!userData.user) throw new Error("Tu sesión expiró. Ingresa nuevamente.");
+        const { data, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        if (!data.user) throw new Error("Tu sesión expiró. Ingresa nuevamente.");
 
         const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-        const storagePath = `${userData.user.id}/${crypto.randomUUID()}.${extension}`;
+        storagePath = `${data.user.id}/${crypto.randomUUID()}.${extension}`;
         const { error: uploadError } = await supabase.storage.from("product-images").upload(storagePath, photo, {
           cacheControl: "3600",
           contentType: photo.type,
           upsert: false,
         });
         if (uploadError) throw uploadError;
+      }
 
-        const { error: imageError } = await supabase.from("product_images").insert({ product_id: product.id, storage_path: storagePath });
-        if (imageError) {
+      const { data: previousPath, error } = await supabase.rpc("save_product_edit", {
+        p_product_id: product.id,
+        p_title: String(form.get("title")).trim(),
+        p_description: String(form.get("description")).trim(),
+        p_price_cents: Math.round(amount * 100),
+        p_category: String(form.get("category")),
+        p_item_condition: String(form.get("condition")),
+        p_location: String(form.get("location")).trim(),
+        p_status: String(form.get("status")),
+        p_current_image_id: currentImage?.id ?? null,
+        p_new_image_path: storagePath,
+        p_remove_image: removePhoto,
+      });
+      if (error) {
+        // Si se perdió la respuesta, la transacción pudo confirmarse.
+        if (storagePath && /^(?:(?:22|23|42)[0-9A-Z]{3}|P0001|PGRST202)$/.test(error.code)) {
           await supabase.storage.from("product-images").remove([storagePath]);
-          throw imageError;
         }
-        if (currentImage) {
-          await supabase.from("product_images").delete().eq("id", currentImage.id);
-          await supabase.storage.from("product-images").remove([currentImage.storagePath]);
-        }
-      } else if (removePhoto && currentImage) {
-        const { error: deleteImageError } = await supabase.from("product_images").delete().eq("id", currentImage.id);
-        if (deleteImageError) throw deleteImageError;
-        await supabase.storage.from("product-images").remove([currentImage.storagePath]);
+        throw new Error(error.message);
+      }
+
+      if (typeof previousPath === "string") {
+        const { error: cleanupError } = await supabase.storage.from("product-images").remove([previousPath]);
+        if (cleanupError) console.warn("No se pudo limpiar la foto anterior:", cleanupError.message);
       }
 
       router.push("/panel");

@@ -1,38 +1,61 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
-import { products as sampleProducts } from "@/lib/catalog";
-import { fromDatabaseProduct, fromSampleProduct, type DatabaseProduct } from "@/lib/listings";
+import { fromDatabaseProduct, type DatabaseProduct } from "@/lib/listings";
 import { redirectSuperadminFromMarketplace } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
 
 const categories = ["Hogar", "Tecnología", "Moda", "Deportes", "Libros", "Otros"];
 
-async function getPublishedProducts() {
+const pageSize = 12;
+
+function catalogHref(q: string, category: string, page = 1) {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (category) params.set("categoria", category);
+  if (page > 1) params.set("pagina", String(page));
+  return `/${params.size ? `?${params}` : ""}#explorar`;
+}
+
+async function getPublishedProducts(q: string, category: string, page: number) {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const offset = (page - 1) * pageSize;
+    let query = supabase
       .from("products")
       .select("id, title, description, price_cents, category, item_condition, location, product_images(storage_path, position)")
       .eq("status", "published")
-      // Un moderador puede leer todos los registros por sus permisos. Este filtro
-      // evita que una publicación retirada aparezca también en el catálogo público.
       .or(`moderation_status.eq.active,and(moderation_status.eq.suspended,suspended_until.lte.${new Date().toISOString()})`)
       .order("created_at", { ascending: false })
-      .limit(12);
+      .order("id", { ascending: false })
+      .range(offset, offset + pageSize);
 
-    if (!error && data?.length) return (data as DatabaseProduct[]).map(fromDatabaseProduct);
+    if (category) query = query.eq("category", category);
+    if (q) query = query.ilike("title", `%${q}%`);
+    const { data, error } = await query;
+    if (error) return null;
+
+    return {
+      products: ((data ?? []) as DatabaseProduct[]).slice(0, pageSize).map(fromDatabaseProduct),
+      hasMore: (data?.length ?? 0) > pageSize,
+    };
   } catch {
-    // Mientras se configura Supabase se conserva el catálogo de demostración.
+    return null;
   }
-  return sampleProducts.map(fromSampleProduct);
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: {
+  searchParams: Promise<{ q?: string | string[]; categoria?: string | string[]; pagina?: string | string[] }>;
+}) {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
     await redirectSuperadminFromMarketplace(await createClient());
   }
-  const products = await getPublishedProducts();
+  const params = await searchParams;
+  const search = typeof params.q === "string" ? params.q.trim().slice(0, 120) : "";
+  const category = typeof params.categoria === "string" && categories.includes(params.categoria) ? params.categoria : "";
+  const requestedPage = typeof params.pagina === "string" ? Number(params.pagina) : 1;
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 && requestedPage <= 100_000 ? requestedPage : 1;
+  const catalog = await getPublishedProducts(search, category, page);
   return (
     <>
       <SiteHeader />
@@ -44,7 +67,8 @@ export default async function Home() {
             <p className="hero-copy">Descubre productos cerca de ti o publica aquello que ya no usas.</p>
             <form className="search-box" action="/#explorar" method="get">
               <label className="sr-only" htmlFor="search">¿Qué estás buscando?</label>
-              <input aria-label="Buscar productos" id="search" name="q" placeholder="¿Qué estás buscando?" type="search" />
+              <input aria-label="Buscar productos" defaultValue={search} id="search" maxLength={120} name="q" placeholder="¿Qué estás buscando?" type="search" />
+              {category && <input name="categoria" type="hidden" value={category} />}
               <button className="button" type="submit">Buscar</button>
             </form>
           </div>
@@ -57,17 +81,23 @@ export default async function Home() {
         </section>
 
         <section className="categories" aria-label="Categorías">
-          {categories.map((category) => <a href="#explorar" key={category}>{category}</a>)}
+          {categories.map((selected) => <Link aria-current={category === selected ? "true" : undefined} href={catalogHref(search, selected)} key={selected}>{selected}</Link>)}
         </section>
 
         <section className="catalog-section" id="explorar">
           <div className="section-heading">
             <div><p className="eyebrow">Recién publicados</p><h2>Explora productos</h2></div>
-            <a className="text-link" href="#explorar">Ver todo <span>→</span></a>
+            {(search || category) && <Link className="text-link" href={catalogHref("", "")}>Ver todo</Link>}
           </div>
+          {!catalog && <p role="status">El catálogo no está disponible en este momento. Inténtalo más tarde.</p>}
+          {catalog?.products.length === 0 && <p>No se encontraron publicaciones.</p>}
           <div className="product-grid">
-            {products.map((product) => <ProductCard key={product.id} product={product} />)}
+            {catalog?.products.map((product) => <ProductCard key={product.id} product={product} />)}
           </div>
+          {(page > 1 || catalog?.hasMore) && <nav className="section-heading" aria-label="Páginas del catálogo">
+            {page > 1 && <Link className="text-link" href={catalogHref(search, category, page - 1)}>Anterior</Link>}
+            {catalog?.hasMore && <Link className="text-link" href={catalogHref(search, category, page + 1)}>Siguiente</Link>}
+          </nav>}
         </section>
 
         <section className="how-it-works">

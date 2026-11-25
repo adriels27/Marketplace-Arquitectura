@@ -4,22 +4,20 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/panel";
-  const isPasswordRecovery = next === "/restablecer-contrasena";
+  const isPasswordRecovery = requestUrl.searchParams.get("next") === "/restablecer-contrasena";
+  const failurePath = isPasswordRecovery ? "/recuperar-contrasena" : "/acceder";
+  const failure = new URL(failurePath + "?error=enlace", requestUrl.origin);
 
-  if (code) {
-    const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
-    const { data: claimsData } = await supabase.auth.getClaims();
-    const userId = claimsData?.claims?.sub;
-    if (userId) {
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
-      if (profile?.role === "admin" && !isPasswordRecovery) {
-        return NextResponse.redirect(new URL("/administracion/usuarios", requestUrl.origin));
-      }
-    }
+  if (!code) return NextResponse.redirect(failure);
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error || !data.session || !data.user) return NextResponse.redirect(failure);
+
+  if (isPasswordRecovery) {
+    return NextResponse.redirect(new URL("/restablecer-contrasena", requestUrl.origin));
   }
 
-  // Solo se permiten rutas internas para evitar redirecciones hacia sitios ajenos.
-  return NextResponse.redirect(new URL(next.startsWith("/") ? next : "/panel", requestUrl.origin));
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+  return NextResponse.redirect(new URL(profile?.role === "admin" ? "/administracion/usuarios" : "/panel", requestUrl.origin));
 }

@@ -22,7 +22,7 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
     setLoading(true);
     const form = new FormData(event.currentTarget);
     const rawEmail = String(form.get("email") ?? "");
-    const email = normalizeAccountEmail(rawEmail);
+    const email = rawEmail.trim().toLowerCase();
     const password = String(form.get("password") ?? "");
     const fullName = String(form.get("fullName") ?? "").trim();
     const birthDate = String(form.get("birthDate") ?? "");
@@ -55,7 +55,11 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
         setMessage("Revisa tu correo para confirmar la cuenta y luego podrás ingresar.");
       } else {
         const supabase = createClient();
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        let { error } = await supabase.auth.signInWithPassword({ email, password });
+        const normalizedEmail = normalizeAccountEmail(email);
+        if (error?.code === "invalid_credentials" && normalizedEmail !== email) {
+          ({ error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password }));
+        }
         if (error) throw error;
         const { data: userData } = await supabase.auth.getUser();
         const { data: profile } = userData.user
@@ -69,7 +73,9 @@ export function AuthForm({ initialMode = "signin" }: AuthFormProps) {
       const errorMessage = error instanceof Error ? error.message : "";
       setMessage(errorCode === "user_banned" || /user is banned|account.*banned/i.test(errorMessage)
         ? "Tu cuenta fue baneada permanentemente después de recibir el tercer strike por infringir las normas. No puedes iniciar sesión."
-        : errorMessage || "No se pudo completar la solicitud.");
+        : /failed to fetch|networkerror|load failed/i.test(errorMessage)
+          ? "No pudimos conectar con el servicio de autenticación. Inténtalo más tarde."
+          : errorMessage || "No se pudo completar la solicitud.");
     } finally {
       setLoading(false);
     }
